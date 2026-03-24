@@ -6,8 +6,9 @@ public static void main(String[] args) {
 SwingUtilities.invokeLater(() ->{
     new MainFrame();
 });
-
-    Metric susScore = new Metric("SUS score", "Higher", 50.0, 0.0, 100.0, "Points");
+    // Made The Calculation Comment Line Beacuse The Calculation Is Made in MainFrame
+    //I got help from AI for making this part commment line
+  /*  Metric susScore = new Metric("SUS score", "Higher", 50.0, 0.0, 100.0, "Points");
     susScore.setRawValue(85.0);
     double calculatedMetricScore = susScore.calculateTheScoreForGivenDataSet();
     susScore.setScore(calculatedMetricScore);
@@ -28,6 +29,9 @@ double finalDimensionScore = usability.calculateDimensionScore();
     System.out.println("Boyut Toplam Puani: " + finalDimensionScore);
 
 
-    new MainFrame();
+
+   */
+
+
 }
 }
