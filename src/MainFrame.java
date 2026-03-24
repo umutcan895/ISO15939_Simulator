@@ -77,10 +77,18 @@ this.setVisible(true);
         calculationButton.addActionListener(e -> {
             try {
                 double rawData = Double.parseDouble(inputField.getText());
-                double normalizedSCore = (rawData / 100.0) * 5.0;
-                String resultMessage = String.format("Ham Data: %.2f\nNormalize Edilmis Skor (1_5): %.2f", rawData, normalizedSCore);
-                JOptionPane.showMessageDialog(this, resultMessage, "Hesaplama Sonucu ", JOptionPane.INFORMATION_MESSAGE);
-            } catch (NumberFormatException ex) {
+                if(rawData<0||rawData>100){
+                    JOptionPane.showMessageDialog(this,"Hata: Lutfen 0 ile 100 arasinda bir deger giriniz!", "Gecersiz aralik", JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    double normalizedSCore = (rawData / 100.0) * 5.0;
+
+                    String resultMessage = String.format("Ham Data: %.2f\nNormalize Edilmis Skor (1_5): %.2f", rawData, normalizedSCore);
+                    JOptionPane.showMessageDialog(this, resultMessage, "Hesaplama Sonucu ", JOptionPane.INFORMATION_MESSAGE);
+
+
+                }
+                 } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Lutfen Gecerli Deger Girin ","Hata", JOptionPane.ERROR_MESSAGE);
 
             }
