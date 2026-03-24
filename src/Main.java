@@ -1,5 +1,12 @@
+import javax.swing.SwingUtilities;
+
 public class Main {
 public static void main(String[] args) {
+
+SwingUtilities.invokeLater(() ->{
+    new MainFrame();
+});
+
     Metric susScore = new Metric("SUS score", "Higher", 50.0, 0.0, 100.0, "Points");
     susScore.setRawValue(85.0);
     double calculatedMetricScore = susScore.calculateTheScoreForGivenDataSet();
@@ -19,5 +26,8 @@ public static void main(String[] args) {
 
 double finalDimensionScore = usability.calculateDimensionScore();
     System.out.println("Boyut Toplam Puani: " + finalDimensionScore);
+
+
+    new MainFrame();
 }
 }
