@@ -21,11 +21,15 @@ public class Metric {
 
 
     double calculateTheScoreForGivenDataSet() {
+        double range = maxRange - minRange;
+        if(range == 0){
+            return 1.0;
+        }
         double calculatedScore = 0.0;
     if(direction.equalsIgnoreCase("Higher")) {
-         calculatedScore = 1.0 + ((rawValue - minRange) / (maxRange - minRange)) * 4.0;
+         calculatedScore = 1.0 + ((rawValue - minRange) / range) * 4.0;
     }else if(direction.equalsIgnoreCase("Lower")) {
-         calculatedScore = 5.0- ((rawValue - minRange) / (maxRange - minRange))*4.0;
+         calculatedScore = 5.0- ((rawValue - minRange) / range)*4.0;
     }
 
         if (calculatedScore < 1.0) {

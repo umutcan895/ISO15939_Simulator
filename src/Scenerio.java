@@ -14,11 +14,30 @@ public class Scenerio {
 
 
 
-
-
 public void addDimension(Dimension d) {
 this.dimensions.add(d);
 
+}
+
+public double calculateFinalQualityScore() {
+double totalWeightedScore = 0.0;
+double totalWeight = 0.0;
+
+
+    for (Dimension d : dimensions) {
+
+        double dimensionScore = d.calculateDimensionScore();
+        totalWeightedScore += dimensionScore * d.getCoefficient();
+        totalWeight += d.getCoefficient();
+    }
+
+    if (totalWeight == 0.0) {
+
+        return 1.0;
+
+    }
+
+    return totalWeightedScore / totalWeight;
 }
 
 

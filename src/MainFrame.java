@@ -31,11 +31,13 @@ this.setVisible(true);
         JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
 
-        JLabel step1Label = new JLabel("Lutfen bir Seneryo Secini: ");
+        JLabel step1Label = new JLabel("Lutfen bir Seneryo Secini: ", SwingConstants.CENTER);
 
         String[] scenarios = {"Education LMS", "Health INFO System"};
         JComboBox<String> combo = new JComboBox<>(scenarios);
         JButton nextButton = new JButton("Next");
+
+
         nextButton.addActionListener(e -> {
             cardLayout.show(mainPanel,"Step 2");
 
@@ -52,7 +54,7 @@ this.setVisible(true);
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel title = new JLabel("Scenario; " + scenarioName + " - Seletc Dimensions");
+        JLabel title = new JLabel("Scenario; " + scenarioName + " - Seletc Dimensions", SwingConstants.CENTER);
         String[] dimensions = {"usability ", "Reliability ", "Maintainability"};
         JList<String> list = new JList<>(dimensions);
 
@@ -70,7 +72,7 @@ this.setVisible(true);
         JPanel panel = new JPanel(new GridLayout(4,1,10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
 
-        JLabel label = new JLabel("Metrik Degerini Griniz (0_100): " + SwingConstants.CENTER);
+        JLabel label = new JLabel("Metrik Degerini Griniz (0_100): " , SwingConstants.CENTER);
         JTextField inputField = new JTextField();
 
         JButton calculationButton = new JButton("Hesepla");
@@ -81,9 +83,13 @@ this.setVisible(true);
                     JOptionPane.showMessageDialog(this,"Hata: Lutfen 0 ile 100 arasinda bir deger giriniz!", "Gecersiz aralik", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
-                    double normalizedSCore = (rawData / 100.0) * 5.0;
+                    Metric tempMetric = new Metric("SUS Score", "Higher",1.0,0.0,100.0,"Points");
+                    tempMetric.setRawValue(rawData);
 
-                    String resultMessage = String.format("Ham Data: %.2f\nNormalize Edilmis Skor (1_5): %.2f", rawData, normalizedSCore);
+                    double finalScore = tempMetric.calculateTheScoreForGivenDataSet();
+
+
+                    String resultMessage = String.format("Ham Data: %.2f\nNormalize Edilmis Skor (1_5): %.2f", rawData, finalScore);
                     JOptionPane.showMessageDialog(this, resultMessage, "Hesaplama Sonucu ", JOptionPane.INFORMATION_MESSAGE);
 
 
