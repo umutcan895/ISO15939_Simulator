@@ -8,7 +8,6 @@ public class MainFrame extends JFrame {
     private JPanel mainPanel = new JPanel(cardLayout);
     private Scenerio activeScenerio;
 
-    // Step 1 verileri
     private String userName, schoolName, sessionName;
 
     public MainFrame() {
@@ -35,8 +34,8 @@ public class MainFrame extends JFrame {
         JButton nextButton = new JButton("Next");
 
         nextButton.addActionListener(e -> {
-            if(userField.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Lutfen kullanici adini giriniz!");
+            if(userField.getText().isEmpty() || schoolField.getText().isEmpty() || sessionField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Lutfen tum alanlari doldurunuz!");
             } else {
                 userName = userField.getText();
                 schoolName = schoolField.getText();
@@ -67,8 +66,7 @@ public class MainFrame extends JFrame {
         JButton nextButton = new JButton("Next: Plan");
 
         nextButton.addActionListener(e -> {
-            String selected = (String) combo.getSelectedItem();
-            setupActiveScenerio(selected); // Senaryoyu hazirla
+            setupActiveScenerio((String) combo.getSelectedItem());
             mainPanel.add(createStep3Panel(), "Step 3");
             cardLayout.show(mainPanel, "Step 3");
         });
@@ -84,12 +82,15 @@ public class MainFrame extends JFrame {
     private void setupActiveScenerio(String scenarioName) {
         activeScenerio = new Scenerio(scenarioName);
 
-        // Örnek boyut ve metrik ekleme (Senin kodundaki mantikla)
-        Dimension usability = new Dimension("Usability", 1.0);
-        Metric susScore = new Metric("SUS Score", "Higher", 1.0, 0.0, 100.0, "Points");
-        usability.addMetric(susScore);
+        Dimension usability = new Dimension("Usability", 0.6);
+        usability.addMetric(new Metric("SUS Score", "Higher", 0.7, 0.0, 100.0, "Points"));
+        usability.addMetric(new Metric("Task Time", "Lower", 0.3, 10.0, 60.0, "Seconds"));
+
+        Dimension reliability = new Dimension("Reliability", 0.4);
+        reliability.addMetric(new Metric("Uptime", "Higher", 1.0, 95.0, 100.0, "%"));
 
         activeScenerio.addDimension(usability);
+        activeScenerio.addDimension(reliability);
     }
 
     private JPanel createStep3Panel() {
@@ -98,11 +99,13 @@ public class MainFrame extends JFrame {
 
         JLabel title = new JLabel("Step 3: Measurement Plan", SwingConstants.CENTER);
 
-        // Metrikleri tabloya dokme
         String[] columns = {"Metric", "Coefficient", "Direction", "Unit"};
-        ArrayList<Metric> allMetrics = activeScenerio.getDimensions().get(0).getMetrics();
-        Object[][] data = new Object[allMetrics.size()][4];
+        ArrayList<Metric> allMetrics = new ArrayList<>();
+        for(Dimension d : activeScenerio.getDimensions()) {
+            allMetrics.addAll(d.getMetrics());
+        }
 
+        Object[][] data = new Object[allMetrics.size()][4];
         for (int i = 0; i < allMetrics.size(); i++) {
             Metric m = allMetrics.get(i);
             data[i] = new Object[]{m.getName(), m.getCoefficient(), m.getDirection(), m.getUnit()};
@@ -127,12 +130,16 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
-        ArrayList<Metric> metrics = activeScenerio.getDimensions().get(0).getMetrics();
+        ArrayList<Metric> allMetrics = new ArrayList<>();
+        for(Dimension d : activeScenerio.getDimensions()) {
+            allMetrics.addAll(d.getMetrics());
+        }
+
         ArrayList<JTextField> fields = new ArrayList<>();
 
-        for (Metric m : metrics) {
+        for (Metric m : allMetrics) {
             panel.add(new JLabel(m.getName() + " (" + m.getUnit() + "):"));
-            JTextField f = new JTextField();
+            JTextField f = new JTextField("0");
             fields.add(f);
             panel.add(f);
         }
@@ -140,14 +147,14 @@ public class MainFrame extends JFrame {
         JButton nextButton = new JButton("Analyse Results");
         nextButton.addActionListener(e -> {
             try {
-                for (int i = 0; i < metrics.size(); i++) {
+                for (int i = 0; i < allMetrics.size(); i++) {
                     double val = Double.parseDouble(fields.get(i).getText());
-                    metrics.get(i).setRawValue(val);
+                    allMetrics.get(i).setRawValue(val);
                 }
                 mainPanel.add(createStep5Panel(), "Step 5");
                 cardLayout.show(mainPanel, "Step 5");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lutfen gecerli sayisal degerler giriniz!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Lutfen sadece sayisal degerler giriniz!");
             }
         });
 
@@ -158,15 +165,31 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel createStep5Panel() {
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
-        double finalScore = activeScenerio.calculateFinalQualityScore();
-
         panel.add(new JLabel("Step 5: Final Analysis", SwingConstants.CENTER));
-        panel.add(new JLabel("User: " + userName));
+
+        Dimension weakest = null;
+        double lowestScore = 6.0;
+
+        for (Dimension d : activeScenerio.getDimensions()) {
+            double dScore = d.calculateDimensionScore();
+            panel.add(new JLabel(d.getName() + " Score: " + String.format("%.2f", dScore)));
+
+            if (dScore < lowestScore) {
+                lowestScore = dScore;
+                weakest = d;
+            }
+        }
+
+        double finalScore = activeScenerio.calculateFinalQualityScore();
         panel.add(new JLabel("Overall Quality Score: " + String.format("%.2f", finalScore)));
-        panel.add(new JLabel("Gap Analysis (Goal 5.0): " + String.format("%.2f", 5.0 - finalScore)));
+
+        if (weakest != null) {
+            panel.add(new JLabel("Weakest Dimension: " + weakest.getName()));
+            panel.add(new JLabel("Gap Analysis: " + String.format("%.2f", 5.0 - lowestScore)));
+        }
 
         return panel;
     }
