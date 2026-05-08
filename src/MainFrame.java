@@ -5,77 +5,48 @@ import java.util.ArrayList;
 public class MainFrame extends JFrame {
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainPanel = new JPanel(cardLayout);
-    private JPanel stepIndicatorPanel;
     private Scenerio activeScenerio;
+
     private String userName, schoolName, sessionName;
 
     public MainFrame() {
-        setTitle("ISO 15939 Measurement Process Simulator");
-        setSize(850, 650);
+        setTitle("ISO 15939 Simulator");
+        setSize(750, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
 
-        stepIndicatorPanel = createStepIndicator("Profile");
-        add(stepIndicatorPanel, BorderLayout.NORTH);
+        // Panelleri sirayla ekliyoruz
+        mainPanel.add(createStep1Panel(), "Step 1");
+        mainPanel.add(createStep2Panel(), "Step 2");
 
-        mainPanel.add(createStep1Panel(), "Profile");
-        mainPanel.add(createStep2Panel(), "Define");
-
-        add(mainPanel, BorderLayout.CENTER);
-        setVisible(true);
-    }
-
-    private JPanel createStepIndicator(String activeStep) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        String[] steps = {"Profile", "Define", "Plan", "Collect", "Analyse"};
-        boolean foundActive = false;
-
-        for (String step : steps) {
-            JLabel label = new JLabel(step);
-            if (step.equals(activeStep)) {
-                label.setFont(new Font("Arial", Font.BOLD, 14));
-                label.setForeground(Color.BLUE);
-                foundActive = true;
-            } else if (!foundActive) {
-                label.setText(step + " ✓");
-                label.setForeground(new Color(0, 128, 0));
-            }
-            panel.add(label);
-        }
-        return panel;
-    }
-
-    private void updateStepIndicator(String stepName) {
-        remove(stepIndicatorPanel);
-        stepIndicatorPanel = createStepIndicator(stepName);
-        add(stepIndicatorPanel, BorderLayout.NORTH);
-        revalidate();
-        repaint();
+        this.add(mainPanel);
+        this.setVisible(true);
     }
 
     private JPanel createStep1Panel() {
-        JPanel panel = new JPanel(new GridLayout(8, 1, 5, 5));
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 200, 30, 200));
+        JPanel panel = new JPanel(new GridLayout(9, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 150, 30, 150));
+
+        // Step Indicator (Basit versiyon)
+        panel.add(new JLabel("Step 1: Profile > Step 2 > Step 3 > Step 4 > Step 5", SwingConstants.CENTER));
 
         JTextField userField = new JTextField();
         JTextField schoolField = new JTextField();
         JTextField sessionField = new JTextField();
-        JButton nextButton = new JButton("Next");
+        JButton nextButton = new JButton("Next Step");
 
         nextButton.addActionListener(e -> {
-            if (userField.getText().trim().isEmpty()) {
+            if(userField.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter your username to continue.");
-            } else if (schoolField.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter your school name to continue.");
-            } else if (sessionField.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a session name to continue.");
+            } else if(schoolField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter your school to continue.");
+            } else if(sessionField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter session name to continue.");
             } else {
                 userName = userField.getText();
                 schoolName = schoolField.getText();
                 sessionName = sessionField.getText();
-                updateStepIndicator("Define");
-                cardLayout.show(mainPanel, "Define");
+                cardLayout.show(mainPanel, "Step 2");
             }
         });
 
@@ -95,115 +66,123 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 150, 20, 150));
 
-        JRadioButton productRadio = new JRadioButton("Product Quality", true);
-        JRadioButton processRadio = new JRadioButton("Process Quality");
+        panel.add(new JLabel("Profile ✓ > Step 2: Define > Step 3 > Step 4 > Step 5", SwingConstants.CENTER));
+
+        // Quality Type Selection (Mutual Exclusivity gereği ButtonGroup kullanildi)
+        panel.add(new JLabel("Select Quality Type:"));
+        JRadioButton productBtn = new JRadioButton("Product Quality", true);
+        JRadioButton processBtn = new JRadioButton("Process Quality");
         ButtonGroup typeGroup = new ButtonGroup();
-        typeGroup.add(productRadio);
-        typeGroup.add(processRadio);
+        typeGroup.add(productBtn); typeGroup.add(processBtn);
+        panel.add(productBtn); panel.add(processBtn);
 
-        JRadioButton healthRadio = new JRadioButton("Health Mode", true);
-        JRadioButton eduRadio = new JRadioButton("Education Mode");
+        // Mode Selection
+        panel.add(new JLabel("Select Mode:"));
+        JRadioButton healthBtn = new JRadioButton("Health", true);
+        JRadioButton eduBtn = new JRadioButton("Education");
         ButtonGroup modeGroup = new ButtonGroup();
-        modeGroup.add(healthRadio);
-        modeGroup.add(eduRadio);
+        modeGroup.add(healthBtn); modeGroup.add(eduBtn);
+        panel.add(healthBtn); panel.add(eduBtn);
 
-        String[] eduScenarios = {"Scenario C - Team Alpha", "Scenario D - Team Beta"};
-        JComboBox<String> scenarioCombo = new JComboBox<>(eduScenarios);
+        // Scenario Selection
+        panel.add(new JLabel("Select Scenario:"));
+        String[] scenarios = {"Scenario C - Team Alpha", "Scenario D - Team Beta"};
+        JComboBox<String> combo = new JComboBox<>(scenarios);
+        panel.add(combo);
 
-        JButton nextButton = new JButton("Next: Plan");
+        JButton nextButton = new JButton("Next: Plan Measurement");
         nextButton.addActionListener(e -> {
-            setupScenario((String) scenarioCombo.getSelectedItem());
-            mainPanel.add(createStep3Panel(), "Plan");
-            updateStepIndicator("Plan");
-            cardLayout.show(mainPanel, "Plan");
+            setupActiveScenerio((String) combo.getSelectedItem());
+            mainPanel.add(createStep3Panel(), "Step 3");
+            cardLayout.show(mainPanel, "Step 3");
         });
 
-        panel.add(new JLabel("Select Quality Type:"));
-        panel.add(productRadio); panel.add(processRadio);
-        panel.add(new JLabel("Select Mode:"));
-        panel.add(healthRadio); panel.add(eduRadio);
-        panel.add(new JLabel("Select Scenario:"));
-        panel.add(scenarioCombo);
         panel.add(nextButton);
-
         return panel;
     }
 
-    private void setupScenario(String name) {
-        activeScenerio = new Scenerio(name);
+    private void setupActiveScenerio(String scenarioName) {
+        activeScenerio = new Scenerio(scenarioName);
+
+        // Odev dokumanindaki örnek veriler (Education Scenario C)
         Dimension usability = new Dimension("Usability", 25);
         usability.addMetric(new Metric("SUS score", "Higher", 50, 0, 100, "points"));
         usability.addMetric(new Metric("Onboarding time", "Lower", 50, 0, 60, "min"));
 
-        Dimension perf = new Dimension("Perf. Efficiency", 20);
-        perf.addMetric(new Metric("Video start time", "Lower", 50, 0, 15, "sec"));
-        perf.addMetric(new Metric("Concurrent exams", "Higher", 50, 0, 600, "users"));
+        Dimension reliability = new Dimension("Reliability", 20);
+        reliability.addMetric(new Metric("Uptime", "Higher", 50, 95, 100, "%"));
+        reliability.addMetric(new Metric("MTTR", "Lower", 50, 0, 120, "min"));
 
         activeScenerio.addDimension(usability);
-        activeScenerio.addDimension(perf);
+        activeScenerio.addDimension(reliability);
     }
 
     private JPanel createStep3Panel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        panel.add(new JLabel("Profile ✓ > Define ✓ > Step 3: Plan > Step 4 > Step 5", SwingConstants.CENTER), BorderLayout.NORTH);
 
         String[] columns = {"Dimension", "Metric", "Coeff", "Direction", "Range", "Unit"};
-        ArrayList<Object[]> rowList = new ArrayList<>();
-        for (Dimension d : activeScenerio.getDimensions()) {
-            for (Metric m : d.getMetrics()) {
-                rowList.add(new Object[]{d.getName(), m.getName(), m.getCoefficient(), m.getDirection(), m.getMinRange()+"-"+m.getMaxRange(), m.getUnit()});
+        ArrayList<Object[]> rows = new ArrayList<>();
+        for(Dimension d : activeScenerio.getDimensions()) {
+            for(Metric m : d.getMetrics()) {
+                rows.add(new Object[]{d.getName(), m.getName(), m.getCoefficient(), m.getDirection(), m.getMinRange()+"-"+m.getMaxRange(), m.getUnit()});
             }
         }
 
-        Object[][] data = rowList.toArray(new Object[0][]);
+        Object[][] data = rows.toArray(new Object[0][]);
         JTable table = new JTable(data, columns);
-        JButton nextButton = new JButton("Next: Collect");
 
+        JButton nextButton = new JButton("Next: Collect Data");
         nextButton.addActionListener(e -> {
-            mainPanel.add(createStep4Panel(), "Collect");
-            updateStepIndicator("Collect");
-            cardLayout.show(mainPanel, "Collect");
+            mainPanel.add(createStep4Panel(), "Step 4");
+            cardLayout.show(mainPanel, "Step 4");
         });
 
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         panel.add(nextButton, BorderLayout.SOUTH);
+
         return panel;
     }
 
     private JPanel createStep4Panel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JPanel inputPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
-        ArrayList<Metric> metrics = new ArrayList<>();
+        panel.add(new JLabel("Profile ✓ > Define ✓ > Plan ✓ > Step 4: Collect > Step 5", SwingConstants.CENTER), BorderLayout.NORTH);
+
+        JPanel inputArea = new JPanel(new GridLayout(0, 2, 5, 5));
+        ArrayList<Metric> allMetrics = new ArrayList<>();
         ArrayList<JTextField> fields = new ArrayList<>();
 
-        for (Dimension d : activeScenerio.getDimensions()) {
-            for (Metric m : d.getMetrics()) {
-                inputPanel.add(new JLabel(m.getName() + " (" + m.getUnit() + "):"));
+        for(Dimension d : activeScenerio.getDimensions()) {
+            for(Metric m : d.getMetrics()) {
+                inputArea.add(new JLabel(m.getName() + " (" + m.getUnit() + "):"));
                 JTextField f = new JTextField("0");
                 fields.add(f);
-                inputPanel.add(f);
-                metrics.add(m);
+                inputArea.add(f);
+                allMetrics.add(m);
             }
         }
 
-        JButton nextButton = new JButton("Analyse Results");
+        JButton nextButton = new JButton("Analyze and See Results");
         nextButton.addActionListener(e -> {
             try {
-                for (int i = 0; i < metrics.size(); i++) {
-                    metrics.get(i).setRawValue(Double.parseDouble(fields.get(i).getText()));
+                for (int i = 0; i < allMetrics.size(); i++) {
+                    double val = Double.parseDouble(fields.get(i).getText());
+                    allMetrics.get(i).setRawValue(val);
                 }
-                mainPanel.add(createStep5Panel(), "Analyse");
-                updateStepIndicator("Analyse");
-                cardLayout.show(mainPanel, "Analyse");
+                mainPanel.add(createStep5Panel(), "Step 5");
+                cardLayout.show(mainPanel, "Step 5");
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Please enter numeric values only.");
+                JOptionPane.showMessageDialog(this, "Please enter valid numbers!");
             }
         });
 
-        panel.add(new JScrollPane(inputPanel), BorderLayout.CENTER);
+        panel.add(new JScrollPane(inputArea), BorderLayout.CENTER);
         panel.add(nextButton, BorderLayout.SOUTH);
+
         return panel;
     }
 
@@ -211,30 +190,38 @@ public class MainFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
+        panel.add(new JLabel("Profile ✓ > Define ✓ > Plan ✓ > Collect ✓ > Step 5: Analyse", SwingConstants.CENTER));
+
         Dimension weakest = null;
-        double minScore = 6.0;
+        double lowestScore = 6.0;
 
         for (Dimension d : activeScenerio.getDimensions()) {
-            double score = d.calculateDimensionScore();
-            JPanel dPanel = new JPanel(new BorderLayout());
-            dPanel.add(new JLabel(d.getName() + ": " + String.format("%.1f", score)), BorderLayout.WEST);
-            JProgressBar bar = new JProgressBar(1, 5);
-            bar.setValue((int) score);
-            bar.setStringPainted(true);
-            dPanel.add(bar, BorderLayout.CENTER);
-            panel.add(dPanel);
+            double dScore = d.calculateDimensionScore();
 
-            if (score < minScore) {
-                minScore = score;
+            // JProgressBar kullanimi (Odev gereksinimi)
+            JPanel row = new JPanel(new BorderLayout());
+            row.add(new JLabel(d.getName() + " Score: "), BorderLayout.WEST);
+            JProgressBar pb = new JProgressBar(10, 50); // 1.0-5.0 arasi icin 10-50 yaptim
+            pb.setValue((int)(dScore * 10));
+            pb.setStringPainted(true);
+            pb.setString(String.format("%.1f", dScore));
+            row.add(pb, BorderLayout.CENTER);
+            panel.add(row);
+
+            if (dScore < lowestScore) {
+                lowestScore = dScore;
                 weakest = d;
             }
         }
 
         if (weakest != null) {
-            String label = minScore >= 4.5 ? "Excellent" : minScore >= 3.5 ? "Good" : minScore >= 2.5 ? "Needs Improvement" : "Poor";
-            panel.add(new JLabel("Weakest: " + weakest.getName() + " (Score: " + String.format("%.1f", minScore) + ")"));
-            panel.add(new JLabel("Gap: " + String.format("%.1f", 5.0 - minScore)));
-            panel.add(new JLabel("Level: " + label));
+            panel.add(new JLabel("--------------------------------------------------"));
+            panel.add(new JLabel("GAP ANALYSIS"));
+            panel.add(new JLabel("Lowest Dimension: " + weakest.getName() + " (Score: " + String.format("%.1f", lowestScore) + ")"));
+            panel.add(new JLabel("Gap Value: " + String.format("%.1f", 5.0 - lowestScore)));
+
+            String label = (lowestScore >= 4.0) ? "Excellent" : (lowestScore >= 3.0) ? "Good" : "Needs Improvement";
+            panel.add(new JLabel("Quality Level: " + label));
             panel.add(new JLabel("This dimension has the lowest score and requires the most improvement."));
         }
 
