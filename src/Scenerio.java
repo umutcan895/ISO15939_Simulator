@@ -2,37 +2,21 @@ import java.util.ArrayList;
 
 public class Scenerio {
     private String name;
-    private ArrayList<Dimension> dimensions;
+    private ArrayList<Dimension> dimensions = new ArrayList<>();
 
-    public Scenerio(String name) {
-        this.name = name;
-        this.dimensions = new ArrayList<>();
-    }
+    public Scenerio(String name) { this.name = name; }
 
-    public void addDimension(Dimension d) {
-        this.dimensions.add(d);
-    }
+    public void addDimension(Dimension d) { dimensions.add(d); }
 
-    public double calculateFinalQualityScore() {
-        double totalWeightedScore = 0.0;
-        double totalWeight = 0.0;
-
+    public double calculateFinalScore() {
+        double weightedSum = 0, totalWeight = 0;
         for (Dimension d : dimensions) {
-            double dimensionScore = d.calculateDimensionScore();
-            totalWeightedScore += dimensionScore * d.getCoefficient();
+            weightedSum += d.calculateDimensionScore() * d.getCoefficient();
             totalWeight += d.getCoefficient();
         }
-
-        if (totalWeight == 0.0) {
-            return 1.0;
-        }
-
-        return totalWeightedScore / totalWeight;
+        return totalWeight == 0 ? 1.0 : weightedSum / totalWeight;
     }
 
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
     public ArrayList<Dimension> getDimensions() { return dimensions; }
-    public void setDimensions(ArrayList<Dimension> dimensions) { this.dimensions = dimensions; }
 }
