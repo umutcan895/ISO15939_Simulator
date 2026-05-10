@@ -1,4 +1,3 @@
-SENG 272 - My Project
 Name: Umut Can Sarıkaya ID: 202328047
 
 About
